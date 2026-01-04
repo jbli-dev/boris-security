@@ -36,6 +36,7 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
     let weatherHtml = '';
     let cityInput = '';
+    let userDataHtml = '';
 
     if (req.session && req.session.access_token) {
         // Fetch Weather Data
@@ -62,6 +63,7 @@ app.get('/', async (req, res) => {
                 <form action="/" method="GET" style="margin-top: 20px;">
                     <input type="text" name="city" placeholder="Enter city (e.g. London)" value="${city}">
                     <button type="submit">Get Weather</button>
+                    <a href="/user-data" style="margin-left: 10px;"><button type="button">Retrieve My Data</button></a>
                     <a href="/logout" style="margin-left: 10px;">Logout</a>
                 </form>
             `;
@@ -88,6 +90,57 @@ app.get('/', async (req, res) => {
                 <h1>App-1: Weather Client</h1>
                 ${cityInput}
                 ${weatherHtml}
+            </body>
+        </html>
+    `);
+});
+
+// Route to retrieve and display user data
+app.get('/user-data', async (req, res) => {
+    if (!req.session || !req.session.access_token) {
+        return res.redirect('/');
+    }
+
+    let userDataHtml = '';
+
+    try {
+        const response = await axios.get(`${SERVICE_URL}/user-data`, {
+            headers: {
+                'Authorization': `Bearer ${req.session.access_token}`
+            }
+        });
+
+        const userData = response.data;
+        userDataHtml = `
+            <div style="margin-top: 20px; padding: 15px; border: 1px solid #4CAF50; border-radius: 5px; background-color: #f9f9f9;">
+                <h2>My Sensitive Information</h2>
+                <p><strong>Username:</strong> ${userData.username}</p>
+                <p><strong>Secret:</strong> ${userData.secret}</p>
+                <h3>Details:</h3>
+                <p><strong>First Name:</strong> ${userData.Details.firstName}</p>
+                <p><strong>Last Name:</strong> ${userData.Details.lastName}</p>
+                <p><strong>Salary:</strong> $${userData.Details.salary}</p>
+                <p><strong>Role:</strong> ${userData.Details.role}</p>
+            </div>
+        `;
+    } catch (error) {
+        userDataHtml = `<p style="color: red;">Error fetching user data: ${error.message}</p>`;
+        if (error.response && error.response.status === 401) {
+            userDataHtml += '<p> <a href="/logout">Logout and try again</a></p>';
+        } else if (error.response && error.response.status === 404) {
+            userDataHtml += '<p>No data found for your user account.</p>';
+        }
+    }
+
+    res.send(`
+        <html>
+            <body style="font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto;">
+                <h1>App-1: Weather Client</h1>
+                <div style="margin-top: 20px;">
+                    <a href="/"><button style="padding: 10px 20px; cursor: pointer;">Back to Home</button></a>
+                    <a href="/logout" style="margin-left: 10px;">Logout</a>
+                </div>
+                ${userDataHtml}
             </body>
         </html>
     `);

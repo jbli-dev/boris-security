@@ -101,6 +101,27 @@ app.get('/weather', authenticateToken, async (req, res) => {
     }
 });
 
+// Endpoint to retrieve user-specific sensitive data
+app.get('/user-data', authenticateToken, (req, res) => {
+    try {
+        const username = req.user.username; // Get username from JWT token
+        const userData = require('../Database/user_data.json');
+
+        // Find the user's data
+        const userInfo = userData.find(user => user.username === username);
+
+        if (!userInfo) {
+            return res.status(404).json({ error: 'User data not found' });
+        }
+
+        // Return the user's sensitive information
+        res.json(userInfo);
+    } catch (error) {
+        console.error('Error retrieving user data:', error.message);
+        res.status(500).json({ error: 'Failed to retrieve user data' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Weather service running on http://localhost:${PORT}`);
 });

@@ -1,0 +1,22 @@
+[
+    {
+        "username": "user1",
+        "secret": "This-is-a-secret-for-user-1",
+        "Details": {
+            "firstName": "User",
+            "lastName": "1",
+            "salary": 1000,
+            "role": "user"
+        }
+    },
+    {
+        "username": "user2",
+        "secret": "This-is-a-secret-for-user-2",
+        "Details": {
+            "firstName": "User",
+            "lastName": "2",
+            "salary": 2000,
+            "role": "user"
+        }
+    }
+]
