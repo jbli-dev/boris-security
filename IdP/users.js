@@ -29,11 +29,13 @@ module.exports = {
         {
             clientId: 'app-1',
             clientSecret: 'secret-1',
+            jwtSecret: 'jwt-secret-app-1-change-in-production',
             redirectUris: ['http://localhost:3030/callback']
         },
         {
             clientId: 'app-2',
             clientSecret: 'secret-2',
+            jwtSecret: 'jwt-secret-app-2-change-in-production',
             redirectUris: ['http://localhost:3031/callback']
         }
     ]

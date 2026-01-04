@@ -4,16 +4,41 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 3010;
-const JWT_SECRET = 'b9f3d5a8e2c6f1a7d4b9c0e2f5a8d3c1b7e6f4a9c8d2e0f7a1b5c6d9e3f0a2b4c-1'; // Must match IdP
 
-// Middleware to verify JWT
+// Client JWT secrets (must match IdP configuration)
+const CLIENT_SECRETS = {
+    'app-1': 'jwt-secret-app-1-change-in-production',
+    'app-2': 'jwt-secret-app-2-change-in-production'
+};
+
+// Middleware to verify JWT with client-specific secret
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) return res.sendStatus(401); // Unauthorized
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    // First, decode without verification to get the client_id (aud)
+    let decoded;
+    try {
+        decoded = jwt.decode(token);
+    } catch (err) {
+        return res.sendStatus(403); // Forbidden
+    }
+
+    if (!decoded || !decoded.aud) {
+        return res.sendStatus(403); // No audience claim
+    }
+
+    const clientId = decoded.aud;
+    const jwtSecret = CLIENT_SECRETS[clientId];
+
+    if (!jwtSecret) {
+        return res.sendStatus(403); // Unknown client
+    }
+
+    // Now verify with the client-specific secret
+    jwt.verify(token, jwtSecret, (err, user) => {
         if (err) return res.sendStatus(403); // Forbidden
         req.user = user;
         next();

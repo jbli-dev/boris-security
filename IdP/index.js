@@ -6,7 +6,6 @@ const { users, clients } = require('./users');
 
 const app = express();
 const PORT = 3000;
-const JWT_SECRET = 'b9f3d5a8e2c6f1a7d4b9c0e2f5a8d3c1b7e6f4a9c8d2e0f7a1b5c6d9e3f0a2b4c';
 
 // In-memory store for auth codes
 const authCodes = {};
@@ -113,17 +112,16 @@ app.post('/token', (req, res) => {
         return res.status(401).json({ error: 'invalid_client' });
     }
 
-    // Generate JWT
+    // Generate JWT using client-specific secret
     const token = jwt.sign(
         {
             sub: authCodeData.user.id,
             username: authCodeData.user.username,
             name: authCodeData.user.name,
             aud: client_id,
-            aud: client_id,
             iss: 'http://localhost:3000'
         },
-        JWT_SECRET,
+        client.jwtSecret, // Use client-specific JWT secret
         { expiresIn: '1h' }
     );
 
