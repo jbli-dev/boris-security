@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const { users, clients } = require('./users');
+const { users } = require('./users');
+const { clients } = require('../Database/clients.json');
 
 const app = express();
 const PORT = 3000;

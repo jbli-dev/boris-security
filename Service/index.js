@@ -1,15 +1,16 @@
 const express = require('express');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
+const { clients } = require('../Database/clients.json');
 
 const app = express();
 const PORT = 3010;
 
-// Client JWT secrets (must match IdP configuration)
-const CLIENT_SECRETS = {
-    'app-1': 'jwt-secret-app-1-change-in-production',
-    'app-2': 'jwt-secret-app-2-change-in-production'
-};
+// Build CLIENT_SECRETS dynamically from Database
+const CLIENT_SECRETS = {};
+clients.forEach(client => {
+    CLIENT_SECRETS[client.clientId] = client.jwtSecret;
+});
 
 // Middleware to verify JWT with client-specific secret
 const authenticateToken = (req, res, next) => {
